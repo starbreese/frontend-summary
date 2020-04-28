@@ -1,7 +1,5 @@
-<p>
-<img  style="width:300px" src="./assets/monkey.svg">
-</p>
 
+![logo](assets/monkey.svg)
 
 > BY elsie
 
