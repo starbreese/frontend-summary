@@ -1,5 +1,5 @@
 <p>
-<img  style="width:300px" src="/assets/monkey.svg">
+<img  style="width:300px" src="./assets/monkey.svg">
 </p>
 
 
