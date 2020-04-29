@@ -2,4 +2,13 @@
 * [前端框架](/framework/)
   * [vue](/framework/vue/)
   * [react](/framework/react/)
-* [鸣谢](/thanks/)
+* [设计模式](/designPattern/)
+  * [策略模式](/designPattern/strategy/)
+  * [发布订阅模式](/designPattern/publish/)
+  * [装饰者模式](/designPattern/decorator/)
+  * [适配器模式](/designPattern/adapter/)
+  * [代理模式](/designPattern/proxy/)
+  * [责任链模式](/designPattern/responsibility/)
+
+
+
