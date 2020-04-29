@@ -23,8 +23,11 @@
       // 边栏
       subMaxLevel: 2,
       // 其他
-      auto2top: true,
-
+      // auto2top: true,
+      alias: {
+        '/.*/_sidebar.md': '/_sidebar.md',
+        '/.*/_navbar.md': '/_navbar.md'
+      },
       markdown: {
         renderer: {
           code: function(code, lang) {
