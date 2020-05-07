@@ -10,7 +10,8 @@
   * [适配器模式](/designPattern/adapter/)
   * [代理模式](/designPattern/proxy/)
   * [责任链模式](/designPattern/responsibility/)
-
+* [笔试题](/writtenTest/)
+  * [js](/writtenTest/js/)
 
 
 
