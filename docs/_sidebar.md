@@ -12,6 +12,8 @@
   * [责任链模式](/designPattern/responsibility/)
 * [专题](/topic/)
   * [前端性能](/topic/performance/)
+  * [性能监控](/topic/monitor/)
+  * [数组](/topic/array/)
 * [算法](/algorithm/)
   * [树](/algorithm/tree/)
 * [工具](/tool/)
@@ -19,4 +21,6 @@
   * [git](/tool/git/)
 * [笔试题](/writtenTest/)
   * [js](/writtenTest/js/)
-
+* [webgl](/webgl/)
+  * [基础](/webgl/basic/)
+  * [滤镜](/webgl/filters/)
