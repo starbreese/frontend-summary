@@ -356,3 +356,104 @@ function instanceOf(left,right) {
     }
 }
 ```
+
+## new操作符
+### 步骤
+1. 创建一个新对象
+2. 将构造函数的作用域赋给新对象，this指向该对象
+3. 执行构造函数中的代码，为新对象添加属性
+4. 返回新对象
+
+### 代码实现new函数
+```
+function New(func) {
+    var res = {};
+    if (func.prototype !== null) {
+        res.__proto__ = func.prototype;
+    }
+    // Array.prototype.slice.call(arguments, 1)获取除第一个参数除外其他参数
+    var ret = func.apply(res, Array.prototype.slice.call(arguments, 1));
+    if ((typeof ret === "object" || typeof ret === "function") && ret !== null) {
+        return ret;
+    }
+    return res;
+}
+var obj = New(A, 1, 2);
+// equals to
+var obj = new A(1, 2);
+```
+
+## 继承
+### 代码实现
+```
+function Parent(name) {
+    this.name = name;
+}
+Parent.prototype.sayName = function() {
+    console.log('parent name:', this.name);
+}
+function Child(name, parentName) {
+    Parent.call(this, parentName);  
+    this.name = name;    
+}
+function inheritPrototype(subType, superType) {
+    var prototype = object(superType.prototype);
+    prototype.constructor = subType;
+    subType.prototype = prototype;
+}
+function create(proto) {
+    function F(){}
+    F.prototype = proto;
+    return new F();
+}
+// 1.Child.prototype = create(Parent.prototype);
+// Child.prototype = new Parent(); 导致多走一次parent
+// 2.
+Child.prototype = inheritPrototype(Child, Parent);
+Child.prototype.sayName = function() {
+    console.log('child name:', this.name);
+}
+Child.prototype.constructor = Child;
+var parent = new Parent('father');
+parent.sayName();    // parent name: father
+var child = new Child('son', 'father');
+```
+
+## 函数柯里化
+* 运行过程其实是一个参数的收集过程，我们将每一次传入的参数收集起来，并在最里层里面处理。
+### 简易版
+```
+function curry(fn, args) {
+    var length = fn.length;
+    var args = args || [];
+    return function () {
+        newArgs = args.concat(Array.prototype.slice.call(arguments));
+        if(newArgs.length < length) {
+            return curry.call(this, fn, newArgs)
+        } else {
+            return fn.apply(this, newArgs)
+        }
+    }
+}
+function multiFn(a, b, c) {
+    return a * b * c;
+}
+var multi = curry(multiFn);
+multi(2)(3)(4);
+multi(2,3,4);
+multi(2)(3,4);
+multi(2,3)(4);
+```
+### ES6
+```
+const curry = (fn, arr = []) => (...args) => (
+  arg => arg.length === fn.length
+    ? fn(...arg)
+    : curry(fn, arg)
+)([...arr, ...args])
+
+let curryTest=curry((a,b,c,d)=>a+b+c+d)
+curryTest(1,2,3)(4) //返回10
+curryTest(1,2)(4)(3) //返回10
+curryTest(1,2)(3,4) //返回10
+```

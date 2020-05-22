@@ -58,16 +58,19 @@ function initP() {
 * 强制缓存就是向**浏览器缓存**查找该请求结果，并根据该结果的缓存规则来决定是否使用该缓存结果的过程，强制缓存的情况主要有三种
 * 控制强制缓存的字段分别是Expires和Cache-Control，其中Cache-Control优先级比Expires高。
 * 浏览器读取缓存的顺序为memory –> disk
-#### 内存缓存(from memory cache)和硬盘缓存(from disk cache)
 
+#### 内存缓存(from memory cache)和硬盘缓存(from disk cache)
 * 内存缓存
   1. 快速读取：内存缓存会将编译解析后的文件，直接存入该进程的内存中，占据该进程一定的内存资源，以方便下次运行使用时的快速读取。
   2. 时效性：一旦该进程关闭，则该进程的内存则会清空
 * 磁盘缓存
   1. 硬盘缓存则是直接将缓存写入硬盘文件中，读取缓存需要对该缓存存放的硬盘文件进行I/O操作，然后重新解析该缓存内容，读取复杂，速度比内存缓存慢
 * 在浏览器中，浏览器会在js和图片等文件解析执行后直接存入内存缓存中，那么当刷新页面时只需直接从内存缓存中读取(from memory cache)；而css文件则会存入硬盘文件中，所以每次渲染页面都需要从硬盘读取缓存(from disk cache)。
+
 #### Expires
 Expires是HTTP/1.0控制网页缓存的字段，其值为服务器返回该请求结果缓存的到期时间，即再次发起该请求时，如果客户端的时间小于Expires的值时，直接使用缓存结果
+
+
 #### cache-control
 在HTTP/1.1中，Cache-Control是最重要的规则，主要用于控制网页缓存，主要取值为：
   * public：所有内容都将被缓存（客户端和代理服务器都可缓存）
@@ -77,16 +80,34 @@ Expires是HTTP/1.0控制网页缓存的字段，其值为服务器返回该请�
   * max-age=xxx (xxx is numeric)：缓存内容将在xxx秒后失效
 
 ### 协商缓存
-  * 强制缓存失效后，浏览器携带缓存标识向**服务器**发起请求，由服务器根据缓存标识决定是否使用缓存的过程
-  * 生效为304
-  * 控制协商缓存的字段分别有：Last-Modified / If-Modified-Since和Etag / If-None-Match，其中Etag / If-None-Match的优先级比Last-Modified / If-Modified-Since高。
-  
-  #### Last-Modified/If-Modified-Since
-  * Last-Modified**服务器**响应请求时，返回该资源文件在服务器最后被修改的时间
-  * If-Modified-Since是**客户端**再次发起该请求时，携带上次请求返回的Last-Modified值，通过此字段值告诉服务器该资源上次请求返回的最后被修改时间。服务器收到该请求，发现请求头含有If-Modified-Since字段，则会根据If-Modified-Since的字段值与该资源在服务器的最后被修改时间做对比，若服务器的资源最后被修改时间大于If-Modified-Since的字段值，则重新返回资源，状态码为200；否则则返回304，代表资源无更新，可继续使用缓存文件
-  #### Etag / If-None-Match
-  * Etag:服务器响应请求时，返回当前资源文件的一个唯一标识(由服务器生成)
-  * If-None-Match:客户端再次发起该请求时，携带上次请求返回的唯一标识Etag值，通过此字段值告诉服务器该资源上次请求返回的唯一标识值。服务器收到该请求后，发现该请求头中含有If-None-Match，则会根据If-None-Match的字段值与该资源在服务器的Etag值做对比，一致则返回304，代表资源无更新，继续使用缓存文件；不一致则重新返回资源文件，状态码为200
+* 强制缓存失效后，浏览器携带缓存标识向**服务器**发起请求，由服务器根据缓存标识决定是否使用缓存的过程
+* 生效为304
+* 控制协商缓存的字段分别有：Last-Modified / If-Modified-Since和Etag / If-None-Match，其中Etag / If-None-Match的优先级比Last-Modified / If-Modified-Since高。
+
+#### Last-Modified/If-Modified-Since
+* Last-Modified**服务器**响应请求时，返回该资源文件在服务器最后被修改的时间
+* If-Modified-Since是**客户端**再次发起该请求时，携带上次请求返回的Last-Modified值，通过此字段值告诉服务器该资源上次请求返回的最后被修改时间。服务器收到该请求，发现请求头含有If-Modified-Since字段，则会根据If-Modified-Since的字段值与该资源在服务器的最后被修改时间做对比，若服务器的资源最后被修改时间大于If-Modified-Since的字段值，则重新返回资源，状态码为200；否则则返回304，代表资源无更新，可继续使用缓存文件
+
+#### Etag / If-None-Match
+* Etag:服务器响应请求时，返回当前资源文件的一个唯一标识(由服务器生成)
+* If-None-Match:客户端再次发起该请求时，携带上次请求返回的唯一标识Etag值，通过此字段值告诉服务器该资源上次请求返回的唯一标识值。服务器收到该请求后，发现该请求头中含有If-None-Match，则会根据If-None-Match的字段值与该资源在服务器的Etag值做对比，一致则返回304，代表资源无更新，继续使用缓存文件；不一致则重新返回资源文件，状态码为200
 
 ### 总结
 强制缓存优先于协商缓存进行，若强制缓存(Expires和Cache-Control)生效则直接使用缓存，若不生效则进行协商缓存(Last-Modified / If-Modified-Since和Etag / If-None-Match)，协商缓存由服务器决定是否使用缓存，若协商缓存失效，那么代表该请求的缓存失效，重新获取请求结果，再存入浏览器缓存中；生效则返回304，继续使用缓存
+
+## get&post
+### 区别
+* GET在浏览器回退时是无害的，而POST会再次提交请求。
+* GET产生的URL地址可以被Bookmark，而POST不可以。
+* GET请求会被浏览器主动cache，而POST不会，除非手动设置。
+* GET请求只能进行url编码，而POST支持多种编码方式。
+* GET请求参数会被完整保留在浏览器历史记录里，而POST中的参数不会被保留。
+* GET请求在URL中传送的参数是有长度限制的，而POST么有。
+* 对参数的数据类型，GET只接受ASCII字符，而POST没有限制。
+* GET比POST更不安全，因为参数直接暴露在URL上，所以不能用来传递敏感信息。
+* GET参数通过URL传递，POST放在Request body中。
+
+### 本质
+* GET和POST本质上就是TCP链接，并无差别。但是由于HTTP的规定和浏览器/服务器的限制，导致他们在应用过程中体现出一些不同
+* GET产生一个TCP数据包；POST产生两个TCP数据包
+* 并不是所有浏览器都会在POST中发送两次包，Firefox就只发送一次
