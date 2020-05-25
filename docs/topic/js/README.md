@@ -421,6 +421,7 @@ var child = new Child('son', 'father');
 
 ## 函数柯里化
 * 运行过程其实是一个参数的收集过程，我们将每一次传入的参数收集起来，并在最里层里面处理。
+
 ### 简易版
 ```
 function curry(fn, args) {
@@ -444,6 +445,7 @@ multi(2,3,4);
 multi(2)(3,4);
 multi(2,3)(4);
 ```
+
 ### ES6
 ```
 const curry = (fn, arr = []) => (...args) => (
@@ -456,4 +458,366 @@ let curryTest=curry((a,b,c,d)=>a+b+c+d)
 curryTest(1,2,3)(4) //返回10
 curryTest(1,2)(4)(3) //返回10
 curryTest(1,2)(3,4) //返回10
+```
+
+## bind,call,apply
+### 模拟apply
+[参考](https://github.com/mqyqingfeng/Blog/issues/11)
+* 思路 
+```
+var foo = {
+    value: 1,
+    bar: function() {
+        console.log(this.value)
+    }
+};
+foo.bar();
+```
+* 步骤
+    1. 函数设为对象的属性
+    2. 执行该函数
+    3. 删除该函数
+
+* 代码
+
+call函数
+```
+Function.prototype.call2 = function(content = window) {
+    content.fn = this;
+    let args = [...arguments].slice(1);
+    let result = content.fn(...args);
+    delete content.fn;
+    return result;
+}
+let foo = {
+    value: 1
+}
+function bar(name, age) {
+    console.log(name)
+    console.log(age)
+    console.log(this.value);
+}
+bar.call2(foo, 'black', '18') // black 18 1
+```
+
+apply函数
+```
+Function.prototype.apply2 = function(context = window) {
+    context.fn = this
+    let result;
+    // 判断是否有第二个参数
+    if(arguments[1]) {
+        result = context.fn(...arguments[1])
+    } else {
+        result = context.fn()
+    }
+    delete context.fn
+    return result
+}
+```
+
+### 实现一个bind
+[MDN](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Function/bind)
+```
+Function.prototype.bind = function() {
+    var slice = Array.prototype.slice;
+    var thatFunc = this, thatArg = arguments[0];
+    var args = slice.call(arguments, 1);
+    if (typeof thatFunc !== 'function') {
+      // closest thing possible to the ECMAScript 5
+      // internal IsCallable function
+      throw new TypeError('Function.prototype.bind - ' +
+             'what is trying to be bound is not callable');
+    }
+    return function(){
+      var funcArgs = args.concat(slice.call(arguments))
+      return thatFunc.apply(thatArg, funcArgs);
+    };
+};
+```
+
+## const let var
+### const
+```
+    var __const = function __const (data, value) {
+        window.data = value // 把要定义的data挂载到window下，并赋值value
+        Object.defineProperty(window, data, { // 利用Object.defineProperty的能力劫持当前对象，并修改其属性描述符
+          enumerable: false,
+          configurable: false,
+          get: function () {
+            return value
+          },
+          set: function (data) {
+            if (data !== value) { // 当要对当前属性进行赋值时，则抛出错误！
+              throw new TypeError('Assignment to constant variable.')
+            } else {
+              return value
+            }
+          }
+        })
+      }
+      __const('a', 10)
+      console.log(a)
+      delete a
+      console.log(a)
+      for (let item in window) { // 因为const定义的属性在global下也是不存在的，所以用到了enumerable: false来模拟这一功能
+        if (item === 'a') { // 因为不可枚举，所以不执行
+          console.log(window[item])
+        }
+      }
+    a = 20 // 报错
+```
+### var
+var变量声明提升, const和let却不会
+
+### const let 
+* 临时死区
+```
+if(condition) {
+    console.log(typeof value);
+    // VM107:2 Uncaught ReferenceError: Cannot access 'value' before initialization
+    let value = "blue"
+}
+```
+
+    这样却可以
+```
+// undefined
+console.log(typeof value);
+if(true) {
+    let value = "blue"
+}
+```
+* 用let || const 不能覆盖全局对象，只能遮蔽他（会在全局作用域下创建一个新的绑定，但该绑定不会添加为全局对象的属性）
+
+## Iterator && Generator
+* for of 使用于可迭代对象，用于不可迭代对象，如null、undefined会报错
+* 数组，map,set, 字符串，nodelist
+* 展开运算符可作用于可迭代对象，并转换成数组 [...set]
+
+### 基础
+#### es5的迭代器
+```
+function createIterator(items){
+    var i = 0;
+    return {
+        next: function() {
+            var done = (i >= items.length);
+            var value = !done ? items[i++] : undefined;
+            return {
+                done,
+                value
+            };
+        }
+    }
+}
+var iterators = createIterator([1, 2, 3]);
+console.log(iterators.next()) // {done: false, value: 1}
+console.log(iterators.next()) // {done: false, value: 2}
+console.log(iterators.next()) // {done: false, value: 3}
+console.log(iterators.next()) // {done: true, value: undefined}
+```
+#### es6
+```
+function* makeRangeIterator(start = 0, end = Infinity, step = 1) {
+    for (let i = start; i < end; i += step) {
+        yield i;
+    }
+}
+var a = makeRangeIterator(1,10,2)
+a.next() // {value: 1, done: false}
+a.next() // {value: 3, done: false}
+a.next() // {value: 5, done: false}
+a.next() // {value: 7, done: false}
+a.next() // {value: 9, done: false}
+a.next() // {value: undefined, done: true}
+```
+#### 检测对象是否为可迭代对象
+对象默认的迭代器 属性为Symbol.iterator的方法
+```
+function isIterable(obj) {
+    return typeof obj[Symbol.iterator] === 'function'
+}
+```
+#### 创建可迭代对象
+```
+var myIterable = {
+  *[Symbol.iterator]() {
+    yield 1;
+    yield 2;
+    yield 3;
+  }
+}
+for (let value of myIterable) { 
+    console.log(value); 
+}
+```
+#### 集合对象迭代器
+    * entries() 返回一个迭代器，其值为多个键值对
+    * values()
+    * keys()
+
+### 高级迭代器
+    * The next() 方法也接受一个参数用于修改生成器内部状态。传递给 next() 的参数值会被yield接收。
+    * 要注意的是，传给第一个 next() 的值会被忽略。
+#### 传递参数
+```
+function* createIterator() {
+    let first = yield 'welcome';
+    let second = yield first + 'world';
+    yield second + 'hard';
+}
+// next方法不带参数
+let iterator = createIterator();
+console.log(iterator.next());// { value: 'welcome', done: false }
+console.log(iterator.next());// { value: 'undefinedworld', done: false }
+console.log(iterator.next()); // { value: 'undefinedhard', done: false }
+console.log(iterator.next());//{ value: undefined, done: true }
+//next方法带参数
+iterator = createIterator();
+console.log(iterator.next());//{ value: 'welcome', done: false }
+console.log(iterator.next('hello')); //{ value: 'helloworld', done: false }
+console.log(iterator.next('work')); //{ value: 'workhard', done: false }
+console.log(iterator.next());//{ value: undefined, done: true }
+```
+#### 抛出错误
+* throw()命令迭代器继续执行，但同时抛出一个错误
+```
+function* createIterator() {
+    let first = yield 1;
+    let second;
+    try {
+        second = yield first + 2;
+    } catch (ex) {
+        second = 6;
+    }
+    yield second + 3;
+}
+let iterator = createIterator();
+console.log(iterator.next()); //{ value: 1, done: false }
+console.log(iterator.next(4)); //{ value: 6, done: false }
+console.log(iterator.throw(new Error("Boom"))); //{ value: 9, done: false }
+console.log(iterator.next()); //{ value: undefined, done: true }
+```
+
+#### 返回语句return
+* return 表示所有操作已完成，done被置为true
+```
+function *createIterator(){
+    yield 1;
+    return 2;
+    yield 3;
+    yield 4;
+}
+let i = createIterator();
+console.log(i.next()); // {value: 1, done: false}
+console.log(i.next()); // {value: 2, done: true}
+console.log(i.next()); // {value: undefined. done: true}
+```
+
+#### 委托生成器
+将迭代器合二为一
+```
+function* createNumberIterator() {
+    yield 1;
+    yield 2;
+    // 将这句return 改为yield 3后
+    // 输出结果为 1, 2, 3, undefined, undefined, undefined
+    return 3; 
+}
+function* createRepeatingIterator(count) {
+    for (let i = 0; i < count; i++) {
+        yield "repeat";
+    }
+}
+function* createCombinedIterator() {
+    let result = yield* createNumberIterator();
+    yield* createRepeatingIterator(result);
+}
+let iterator = createCombinedIterator();
+console.log(iterator.next()); //{ value: 1, done: false }
+console.log(iterator.next()); //{ value: 2, done: false }
+console.log(iterator.next()); //{ value: 'repeat', done: false }
+console.log(iterator.next()); //{ value: 'repeat', done: false }
+console.log(iterator.next()); //{ value: 'repeat', done: false }
+console.log(iterator.next()); //{ value: undefined, done: true }
+```
+如果想输出数值3，则
+```
+function* createCombinedIterator() {
+    let result = yield* createNumberIterator();
+    yield result;
+    yield* createRepeatingIterator(result);
+}
+```
+
+#### 异步任务执行
+*  简单版
+```
+function run(taskDef) {
+  //创建一个无使用限制的迭代器
+    let task = taskDef();
+    //开始执行任务
+    let result = task.next();
+    //循环调用next()的函数
+    function step() {
+        //如果任务未完成，则继续执行
+        if (!result.done) {
+            result = task.next(result.value);
+            step();
+        }
+    }
+    step();
+}
+run(function* (){
+    let value = yield 1;
+    console.log(value); // 1
+    value = yield value +3;
+    console.log(value); // 4
+});
+```
+* 异步过程
+```
+let fs = require('fs');
+function run(taskDef) {
+    //创建一个无使用限制的迭代器
+    let task = taskDef();
+    //开始执行任务
+    let result = task.next();
+    //循环调用next()的函数
+    function step() {
+        //如果任务未完成，则继续执行
+        if (!result.done) {
+          //这里假设如果result.value是一个函数，那么就一定是异步执行的。
+          if (typeof result.value === 'function') {
+              //传入一个回调函数作为参数来调用它，回调函数遵循Node.js中有关
+              //错误的约定：所有可能的错误放在第一个参数err中，结果放在第二个参数中。
+              result.value(function (err, data) {
+                  //err存在，说明执行过程产生了错误
+                  if (err) {
+                      result = task.throw(err);
+                      return;
+                  }
+                  //如果没有错误产生，data就会被复制给yield左边的变量
+                  result = task.next(data);
+                  step();
+              })
+          } else {
+              result = task.next(result.value);
+              step();
+            }
+        }
+    }
+    step();
+}
+//readFile必须返回一个函数，接收callback
+function readFile(filename) {
+    return function (callback) {
+        fs.readFile(filename, callback);
+    }
+}
+run(function* () {
+    let contents = yield readFile("txt.text");
+    console.log(contents); //类似这样的结果 <Buffer 68 65 6c 6c 6f 20 77 6f 72 6c 64>
+});
 ```
