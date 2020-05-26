@@ -821,3 +821,106 @@ run(function* () {
     console.log(contents); //类似这样的结果 <Buffer 68 65 6c 6c 6f 20 77 6f 72 6c 64>
 });
 ```
+
+## es6字符串
+### es6中的标签模板
+标签模板是让字符串模板跟在函数名后面，该函数来处理字符串模板：
+```
+let age = 22;
+var tag = function(arr,arg){
+    console.log(arr); // ['my age is', '']
+    console.log(arg); // 22
+}
+tag`my age is${ age }`;
+```
+返回函数
+```
+function template(strings, ...keys) {
+  return (function(...values) {
+    var dict = values[values.length - 1] || {};
+    var result = [strings[0]];
+    keys.forEach(function(key, i) {
+      var value = Number.isInteger(key) ? values[key] : dict[key];
+      result.push(value, strings[i + 1]);
+    });
+    return result.join('');
+  });
+}
+var t1Closure = template`${0}${1}${0}!`;
+t1Closure('Y', 'A');  // "YAY!" 
+var t2Closure = template`${0} ${'foo'}!`;
+t2Closure('Hello', {foo: 'World'});  // "Hello World!"
+```
+### 原始字符串
+```
+var str = String.raw`Hi\n${2+3}!`;
+// "Hi\n5!"
+str.length;
+// 6
+str.split('').join(',');
+// "H,i,\,n,5,!"
+```
+
+## es6函数
+### 默认参数表达式
+初次解析函数声明不会调用getValue函数，只有调用add函数且第二个参数不传入才会调用
+```
+let value = 5;
+function getValue() {
+    return ++value;
+}
+function add(first, second=getValue()){
+    return first + second;
+}
+console.log(add(1, 1)) // 2
+console.log(add(1)) // 7
+console.log(add(1)) // 8
+```
+
+在引用参数默认值的时候，只允许引用前面参数的值，即先定义的参数不能访问后定义的参数
+```
+function add (first = second, second) {
+    return first + second;
+}
+console.log(add(1, 1)) // 2
+console.log(add(undefined, 1)) // 抛出错误
+```
+
+### 判断是否通过new关键字被调用
+```
+function Person(name) {
+    if(this instanceof Person) {
+        this.name = name
+    } else {
+        throw new Error("必须通过new关键字来调用Person")
+    }
+}
+var person = new Person('a);
+var notAPerson = Person.call(person, "bb"); // 有效
+```
+
+增加了new.target
+```
+function Person(name) {
+    if(typeof new.target !== 'undefined') {
+        this.name = name
+    } else {
+        throw new Error("必须通过new关键字来调用Person")
+    }
+}
+```
+### 箭头函数
+#### 区别
+* 没有this、super、arguments、new.target的绑定
+* 不能通过new关键字调用
+* 没有原型
+* 不可以改变this的绑定, 取决于该函数外部非剪头函数的this值
+* 没有auguments绑定，始终可以访问外围函数的arguments对象
+* 不支持重复的命名函数
+
+#### 注意
+1. 返回一个对象
+```
+let getItem = id => ({id, name: 'temp'})
+```
+2. 
