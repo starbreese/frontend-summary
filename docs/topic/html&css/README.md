@@ -9,6 +9,11 @@
 由于在 touchstart（或系列 touchmove 事件里的首个）中调用 preventDefault() 也会阻止相应的鼠标事件的触发，因此一般情况下我们在touchmove 而不是 touchstart 中调用它，这样，鼠标事件仍可正常触发，链接等部件也可继续工作
 
 ## css基础
+
+### box-sizing
+* content-box  是默认值。如果你设置一个元素的宽为100px，那么这个元素的内容区会有100px 宽，并且任何边框和内边距的宽度都会被增加到最后绘制出来的元素宽度中。W3C的标准盒模型
+* border-box 告诉浏览器：你想要设置的边框和内边距的值是包含在width内的。也就是说，如果你将一个元素的width设为100px，那么这100px会包含它的border和padding，内容区的实际宽度是width减去(border + padding)的值。大多数情况下，这使得我们更容易地设定一个元素的宽高。IE盒模型
+
 ## h5屏幕适配
 ### 基础概念
 * 物理像素（physical pixel），也叫设备像素
@@ -283,5 +288,115 @@ $baseDesignWidth = 750;
 //边框采用px，假如设计稿边框宽度1px
 .box{
 	border : 1px solid #ddd;
+}
+```
+
+## 水平垂直居中
+### 水平居中
+* 块级元素使用margin: 0 auto;可以在父元素的中间位置居中，不过要记得设置块级元素的宽高。
+* margin-left + border-left-width + padding-left + width + padding-rigth + border-right-width + margin-righ = width
+
+### 垂直居中
+* div使用绝对布局，设置margin:auto;并设置top、left、right、bottom的值相等即可，不一定要都是0
+* top + margin-top + border-top-width + padding-top + height + padding-bottom + border-bottom-width + margin-bottom + bottom = height
+
+### 水平垂直居中
+* 使用绝对定位+负margin，这种方法需要知道子元素的高度
+```
+<style>
+    .father {
+        position: relative;
+        width: 500px;
+        height: 500px;
+        background-color: blue;
+    }
+    .center {
+        width: 100px;
+        height: 100px;
+        background-color: red;
+        position: absolute;
+        top: 50%;
+        margin-top: -50px;
+    }
+</style>
+<body>
+    <div class="father">
+        <div class="center">
+            <span style="line-height: 100px">hello world</span>
+        </div>
+    </div>
+</body>
+```
+* 相对定位+transform，这种情况不需要知道子元素的高度
+```
+<style>
+    .father {
+        position: relative;
+        height: 500px;
+        width: 500px;
+        background-color: blue;
+    }
+    .center {
+        position: relative;
+        top: 50%;
+        width: 200px;
+        height: 200px;
+        background-color: red;
+        transform: translateY(-50%);
+    }
+</style>
+<body>
+    <div class="father">
+        <div class="center">hello</div>
+    </div>
+</body>
+```
+* 设置vertical-align:middle让图片和文字居中显示
+```
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        .center {
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <img class="center" src="buct.jpg" alt="" width="100px" height="100px"><span>hello world</span>
+</body>
+</html>
+```
+* flexbox
+```
+.warp {
+  display: -webkit-flex;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -webkit-box;
+  display: flex;
+  -webkit-box-align: center;
+  -moz-box-align: center;
+  -ms-flex-align: center;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -moz-box-pack: center;
+  -ms-flex-pack: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  width: 200px;
+  height: 200px;
+  background-color: orange;
+}
+.example3 {
+  width: 100px;
+  height: 100px;
+  background-color: red;
 }
 ```
