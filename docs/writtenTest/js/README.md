@@ -1,5 +1,5 @@
-1. this作用域
-    ```
+## this作用域
+```
 var name="abc";
 var person={
     name:'cba',
@@ -13,9 +13,10 @@ console.log(p1()); // abc
 var p2=new p1();
 console.log(p2.name); // undefined
 ```
-    **result: cba, abc, undefined**
-2. call 和闭包
-    ```
+**result: cba, abc, undefined**
+
+## call 和闭包
+```
 var v='cba';
 (function () {
     var v='abc'
@@ -33,10 +34,10 @@ var v='cba';
     b.getV(); // a
 }())
 ```
-    **result: a**
+**result: a**
 
-    换成
-    ```
+换成
+```
 function A() {
     var v='a'
     this.getV=function () {
@@ -48,10 +49,10 @@ function B() {
     A.call(this);
 }
 ```
-    **result: b**
+**result: b**
 
-    换成
-    ```
+换成
+```
 function A() {
     this.v='a'
     this.getV=function () {
@@ -63,8 +64,9 @@ function B() {
     A.call(this);
 }
 ```
-    **result: a**
-3. 定时器
+**result: a**
+
+## 定时器
 ```
 var i=1;
 (
@@ -82,10 +84,10 @@ var i=1;
     }
 )()
 ```
-    **result:**
-    20=200/10
+**result:**
+20=200/10
 
-4. 作用域
+## 作用域
 ```
 var foo=1;
 function main() {
@@ -97,12 +99,13 @@ function main() {
 main();
 new main();
 ```
-    **result:**
+**result:**
     
-    undefined 1<br>
-    main:{foo: 3}
-5. 作用域
-    ```
+undefined 1<br>
+main:{foo: 3}
+
+## 作用域
+```
 function one() {
     this.name = 1;
     function two() {
@@ -117,10 +120,10 @@ function one() {
 }
 one()()();
 ```
-    **result: 2**
+**result: 2**
     
-    换成<br>
-    ```
+换成<br>
+```
 function one() {
     this.name = 1;
     function two() {
@@ -135,9 +138,10 @@ function one() {
 }
 one()()();
 ```
-  **result: 3**
-6. 异步 <https://juejin.im/post/58f1fa6a44d904006cf25d22>
-    ```
+**result: 3**
+
+## 异步[参考](https://juejin.im/post/58f1fa6a44d904006cf25d22)
+```
 for (var i = 0; i < 5; i++) {
     setTimeout(function() {
         console.log(new Date, i);
@@ -145,58 +149,58 @@ for (var i = 0; i < 5; i++) {
 }
 console.log(new Date, i);
 ```
-    **result**
-    ```nohighlight
-    2017-03-18T00:43:44.873Z 5
-    2017-03-18T00:43:46.866Z 5
-    2017-03-18T00:43:46.868Z 5
-    2017-03-18T00:43:46.868Z 5
-    2017-03-18T00:43:46.868Z 5
-    2017-03-18T00:43:46.868Z 5
-    ```
-    循环执行过程中，几乎同时设置了 5 个定时器，一般情况下，这些定时器都会在 1 秒之后触发，而循环完的输出是立即执行的
+**result**
+```nohighlight
+2017-03-18T00:43:44.873Z 5
+2017-03-18T00:43:46.866Z 5
+2017-03-18T00:43:46.868Z 5
+2017-03-18T00:43:46.868Z 5
+2017-03-18T00:43:46.868Z 5
+2017-03-18T00:43:46.868Z 5
+```
+循环执行过程中，几乎同时设置了 5 个定时器，一般情况下，这些定时器都会在 1 秒之后触发，而循环完的输出是立即执行的
 #### 期望输出5->0,1,2,3,4
-    ##### 第一种
-    ```
-    for(var i = 0; i < 5; i++) {
-        (function(j){
-            setTimeout(function(){
-                console.log(new Date, j)
-            }, 1000)
-        })(i)
-    }
-    console.log(new Date, i);
-    ```
-    ##### 第二种
-    ```
-    for (var i = 0; i < 5; i++) {
-        setTimeout(function(j) {
-            console.log(new Date, j);
-        }, 1000, i);
-    }
-    console.log(new Date, i);
-    ```
-    ##### 第三种
-    ```
-    var output = function (i) {
-        setTimeout(function() {
-            console.log(new Date, i);
-        }, 1000);
-    };
-    for (var i = 0; i < 5; i++) {
-        output(i);  // 这里传过去的 i 值被复制了
-    }
-    console.log(new Date, i);
-    ```
-    ##### 第四种
-    ```
-    for (let i = 0; i < 5; i++) {
-        setTimeout(function() {
-            console.log(new Date, i);
-        }, 1000);
-    }
-    console.log(new Date, i);
-    ```
+##### 第一种
+```
+for(var i = 0; i < 5; i++) {
+    (function(j){
+        setTimeout(function(){
+            console.log(new Date, j)
+        }, 1000)
+    })(i)
+}
+console.log(new Date, i);
+```
+##### 第二种
+```
+for (var i = 0; i < 5; i++) {
+    setTimeout(function(j) {
+        console.log(new Date, j);
+    }, 1000, i);
+}
+console.log(new Date, i);
+```
+##### 第三种
+```
+var output = function (i) {
+    setTimeout(function() {
+        console.log(new Date, i);
+    }, 1000);
+};
+for (var i = 0; i < 5; i++) {
+    output(i);  // 这里传过去的 i 值被复制了
+}
+console.log(new Date, i);
+```
+##### 第四种
+```
+for (let i = 0; i < 5; i++) {
+    setTimeout(function() {
+        console.log(new Date, i);
+    }, 1000);
+}
+console.log(new Date, i);
+```
 #### 期望输出0->1->2->3->4->5, 每隔一秒输出
 ##### 第一版
 ```
@@ -268,43 +272,67 @@ const sleep = (timeountMS) => new Promise((resolve) => {
 })();
 ```
 
-7. 实现一个getX, 支持path取数，支持函数，数组
+## 实现一个getX, 支持path取数，支持函数，数组
 ```javascript
-    function getx(source, path) {
-        // \d+可表示多位数字
-        const paths = path.replace(/\[(\d+)\]/g, '.$1').split('.');
-        // 匹配() .+?
-        const reg= /\((.*?)\)/g;
+function getx(source, path) {
+    // \d+可表示多位数字
+    const paths = path.replace(/\[(\d+)\]/g, '.$1').split('.');
+    // 匹配() .+?
+    const reg= /\((.*?)\)/g;
 
-        let result = source;
-        for (const p of paths) {
-            if(reg.test(p)){ //如果匹配上直接获取括号里的内容
-                let args = RegExp.$1;
-                args = args ? args.split(',') : [];
-                let regNum = /\d+/g;
-                args = args.map(a => {
-                    if(regNum.test(a)) {
-                        return parseInt(a);
-                    } else {
-                        return a
-                    }
-                });
-                let funcName = p.slice(0, p.indexOf('('));
-                result = result[funcName](...args);
-            } else {
-                result = result[p];
-            }
-            if (result === undefined) {
-                return undefined
-            }
-            }
-        return result
+    let result = source;
+    for (const p of paths) {
+        if(reg.test(p)){ //如果匹配上直接获取括号里的内容
+            let args = RegExp.$1;
+            args = args ? args.split(',') : [];
+            let regNum = /\d+/g;
+            args = args.map(a => {
+                if(regNum.test(a)) {
+                    return parseInt(a);
+                } else {
+                    return a
+                }
+            });
+            let funcName = p.slice(0, p.indexOf('('));
+            result = result[funcName](...args);
+        } else {
+            result = result[p];
+        }
+        if (result === undefined) {
+            return undefined
+        }
+        }
+    return result
+}
+console.log(getx({a:{b:{c:100}}}, 'a.b.c'));
+console.log(getx({a:{b:{c:100}}}, 'a.b.c.d'));
+console.log(getx({a:{b:[{c:100}]}}, 'a.b[0].c'));
+console.log(getx({a:{b:{c:function(){return {d:100}}}}} , 'a.b.c().d'));
+console.log(getx({a:{b:{c:function(factor){return {d:100 * factor}}}}} , 'a.b.c(10).d'));
+console.log(getx({a:{b:{c:function(x, y){return {d: x * y}}}}} , 'a.b.c(10, 20).d'));
+```
+## 请实现如下的函数，可以批量请求数据，所有的 URL 地址在 urls 参数中，同时可以通过 max 参数 控制请求的并发度，当所有请求结束之后，需要执行 callback 回调函数。发请求的函数可以直接使用 fetch 即可
+```
+function sendRequest(urls, max, callback) {
+  const len = urls.length;
+  let idx = 0;
+  let counter = 0;
+  function _request() {
+    // 有请求，有通道
+    while (idx < len && max > 0) {
+      max--; // 占用通道
+      fetch(urls[idx++]).finally(() => {
+        max++; // 释放通道
+        counter++;
+        if (counter === len) {
+          return callback();
+        } else {
+          _request();
+        }
+      });
     }
-    console.log(getx({a:{b:{c:100}}}, 'a.b.c'));
-    console.log(getx({a:{b:{c:100}}}, 'a.b.c.d'));
-    console.log(getx({a:{b:[{c:100}]}}, 'a.b[0].c'));
-    console.log(getx({a:{b:{c:function(){return {d:100}}}}} , 'a.b.c().d'));
-    console.log(getx({a:{b:{c:function(factor){return {d:100 * factor}}}}} , 'a.b.c(10).d'));
-    console.log(getx({a:{b:{c:function(x, y){return {d: x * y}}}}} , 'a.b.c(10, 20).d'));
+  }
+  _request();
+}
 ```
  

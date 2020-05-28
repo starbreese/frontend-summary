@@ -18,6 +18,8 @@
   * [js知识点](/topic/js/)
   * [事件循环](/topic/eventloop/)
   * [浏览器](/topic/browser/)
+  * [ES6](/topic/es6/)
+  * [html&css](/topic/html&css/)
 * [算法](/algorithm/)
   * [树](/algorithm/tree)
 * [工具](/tool/)
